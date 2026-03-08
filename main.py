@@ -909,7 +909,12 @@ def draw_and_test():
 def main():
     """Main function with menu system"""
     global RUN_TIMESTAMP, BASE_SAVE_DIR, MODEL_SAVE_DIR, PLOT_SAVE_DIR, LOG_DIR, DIRECTORIES_CREATED, SCRIPT_STARTED, device
-    
+
+    # Create required directories if they don't exist
+    os.makedirs("data", exist_ok=True)
+    os.makedirs("drawn_digits", exist_ok=True)
+    os.makedirs("outputs", exist_ok=True)
+
     # Prevent multiple executions
     if SCRIPT_STARTED:
         print("Script already started. Exiting...")
@@ -926,7 +931,12 @@ def main():
     
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"Using device: {device}")
+    if device.type == 'cuda':
+        gpu_name = torch.cuda.get_device_name(0)
+        gpu_memory = torch.cuda.get_device_properties(0).total_mem / 1024**3
+        print(f"Using device: GPU ({gpu_name}, {gpu_memory:.1f} GB)")
+    else:
+        print("Using device: CPU (no GPU detected, training will be slower)")
     
     # Set up directories with timestamp - only create once per script run
     if not DIRECTORIES_CREATED:

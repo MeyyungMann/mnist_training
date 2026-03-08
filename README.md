@@ -30,7 +30,7 @@ This project implements a complete training pipeline for MNIST handwritten digit
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd mnist_del2
+cd mnist_training
 ```
 
 2. Install dependencies:
@@ -38,10 +38,7 @@ cd mnist_del2
 pip install -r requirements.txt
 ```
 
-3. Create necessary directories:
-```bash
-mkdir -p data drawn_digits outputs
-```
+3. Required directories (`data/`, `drawn_digits/`, `outputs/`) are created automatically when you run the program.
 
 ## Usage
 
@@ -208,7 +205,7 @@ All models use early stopping with:
 ## File Structure
 
 ```
-mnist_del2/
+mnist_training/
 ├── main.py              # Main training script
 ├── draw_digit.py        # Digit drawing utility
 ├── requirements.txt     # Python dependencies

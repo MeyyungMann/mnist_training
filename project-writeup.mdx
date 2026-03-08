@@ -1,0 +1,70 @@
+---
+title: "MNIST Handwritten Digit Classification"
+description: "A deep learning project to understand CNN architectures by training and comparing multiple models on the MNIST dataset with an interactive testing pipeline."
+tech:
+  - Python
+  - PyTorch
+  - torchvision
+  - matplotlib
+  - seaborn
+  - scikit-learn
+  - NumPy
+github: "https://github.com/MeyyungMann/mnist_training"
+date: 2026-03-08
+featured: false
+demoType: "walkthrough"
+---
+
+## Overview
+
+This project is a hands-on learning exercise in deep learning and computer vision. It implements a complete training pipeline for classifying handwritten digits (0-9) from the MNIST dataset using convolutional neural networks (CNNs) built with PyTorch.
+
+The goal was not just to get high accuracy, but to understand **how** and **why** different model architectures, data augmentation strategies, and training techniques affect performance. The project includes an interactive menu system to train models, visualize data, and test predictions on hand-drawn digits.
+
+## Features
+
+- **Three CNN architectures** (1-layer, 2-layer, 3-layer) to compare how depth affects accuracy
+- **Data augmentation comparison** — trains Model 3 with and without augmentation to measure its impact
+- **Interactive menu system** for training, visualization, and testing without editing code
+- **Hand-drawn digit testing** — draw your own digit and see the model predict it in real time
+- **Saliency maps** — visualize which pixels the model focuses on when making predictions
+- **Confusion matrices** with both raw counts and percentages for detailed error analysis
+- **Training history plots** showing loss and accuracy curves across epochs
+- **Automatic model saving** with timestamps and accuracy in the filename
+- **Early stopping** to prevent overfitting
+- **Windows compatible** with proper multiprocessing handling
+
+## Architecture
+
+The project is built around three CNN models of increasing complexity:
+
+| Model | Conv Layers | Filters | Batch Norm | Dropout | Typical Accuracy |
+|-------|-------------|---------|------------|---------|------------------|
+| 1-Layer | 1 | 32 | No | No | ~95-97% |
+| 2-Layer | 2 | 32, 64 | Yes | 0.2 | ~97-98% |
+| 3-Layer | 3 | 32, 64, 128 | Yes | 0.3 | ~98-99% |
+
+**Key technical decisions:**
+
+- **PyTorch over TensorFlow** — chosen for its Pythonic API and easier debugging, which is better for learning
+- **Validation split from training data** (90/10) — keeps the official test set completely untouched for fair evaluation
+- **Augmentation only on training data** — rotation, affine transforms, and random erasing to improve generalization without contaminating validation/test evaluation
+- **`num_workers=2` with `persistent_workers`** — balanced for Windows compatibility while still allowing parallel data loading
+- **Non-blocking `plt.show()`** — prevents matplotlib from crashing the menu loop on Windows
+- **Timestamped output directories** — each training run saves to its own folder so results are never overwritten
+
+The pipeline flow:
+
+```
+Load Data → Apply Transforms → Train Model → Validate → Save Best → Plot Results
+```
+
+## Learnings
+
+- **Model depth matters, but with diminishing returns** — going from 1 to 2 conv layers gave a big accuracy jump, but 2 to 3 layers gave a smaller improvement. For simple datasets like MNIST, you don't need a massive network.
+- **Data augmentation genuinely helps** — the side-by-side comparison of Model 3 with and without augmentation made this concrete rather than theoretical.
+- **Windows multiprocessing is painful** — PyTorch's `DataLoader` with `num_workers > 0` can crash on Windows because it uses `spawn` instead of `fork`. Learning to debug this taught me about OS-level process differences.
+- **Saliency maps build intuition** — seeing which pixels the model focuses on helped me understand what the network actually learns vs. what I assumed it learns.
+- **Batch normalization and dropout work together** — adding both to deeper models stabilized training and reduced overfitting noticeably.
+- **matplotlib backend quirks** — `plt.show()` behaves differently across OS and contexts. Using `block=False` with `plt.close()` was necessary to keep the interactive menu working.
+- **Early stopping saves time** — instead of guessing the right number of epochs, letting the model stop when validation accuracy plateaus is both simpler and more effective.
