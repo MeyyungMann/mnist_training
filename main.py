@@ -19,6 +19,9 @@ from torch.utils.data import DataLoader, random_split
 from PIL import Image
 import datetime
 import glob
+import signal
+import sys
+
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
 
@@ -40,7 +43,7 @@ def load_data(
     scale=(0.9, 1.1),
     random_erasing_prob=0.0,
     random_crop_padding=None,
-    num_workers=4,
+    num_workers=2,
     pin_memory=True,
     val_split=0.1
 ):
@@ -108,26 +111,30 @@ def load_data(
         download=True,
         transform=basic_transform
     )
+    persistent = num_workers > 0
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
-        pin_memory=pin_memory
+        pin_memory=pin_memory,
+        persistent_workers=persistent
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size=batch_size,
         shuffle=False,
         num_workers=num_workers,
-        pin_memory=pin_memory
+        pin_memory=pin_memory,
+        persistent_workers=persistent
     )
     test_loader = DataLoader(
         test_dataset,
         batch_size=batch_size,
         shuffle=False,
         num_workers=num_workers,
-        pin_memory=pin_memory
+        pin_memory=pin_memory,
+        persistent_workers=persistent
     )
     return train_loader, val_loader, test_loader
 
@@ -389,7 +396,8 @@ def plot_training_history(history, model_name):
     
     plt.tight_layout()
     plt.savefig(os.path.join(PLOT_SAVE_DIR, f'{model_name}_training_history.png'))
-    plt.show()
+    plt.show(block=False)
+    plt.pause(0.5)
 
 def plot_confusion_matrix(model, test_loader, model_name="model"):
     """Plot confusion matrix with both counts and percentages"""
@@ -428,7 +436,8 @@ def plot_confusion_matrix(model, test_loader, model_name="model"):
     
     plt.tight_layout()
     plt.savefig(os.path.join(PLOT_SAVE_DIR, f'{model_name}_confusion_matrix.png'))
-    plt.show()
+    plt.show(block=False)
+    plt.pause(0.5)
     
     # Print summary statistics
     print(f"\n{model_name} - Confusion Matrix Summary:")
@@ -521,8 +530,10 @@ def display_sample_data():
     
     plt.tight_layout()
     plt.savefig(os.path.join(PLOT_SAVE_DIR, 'sample_data.png'))
-    plt.show()
-    
+    plt.show(block=False)
+    plt.pause(1)
+    plt.close()
+
     print(f"Sample data saved to: {os.path.join(PLOT_SAVE_DIR, 'sample_data.png')}")
     
     # Print dataset statistics
@@ -735,8 +746,10 @@ def test_with_drawn_images():
     
     plt.tight_layout()
     plt.savefig(os.path.join(PLOT_SAVE_DIR, 'drawn_digit_analysis.png'))
-    plt.show()
-    
+    plt.show(block=False)
+    plt.pause(1)
+    plt.close()
+
     print(f"\nAnalysis saved to: {os.path.join(PLOT_SAVE_DIR, 'drawn_digit_analysis.png')}")
     
     # Test with multiple drawn digits if available
@@ -874,8 +887,10 @@ def draw_and_test():
     
     plt.tight_layout()
     plt.savefig(os.path.join(PLOT_SAVE_DIR, 'drawn_digit_analysis.png'))
-    plt.show()
-    
+    plt.show(block=False)
+    plt.pause(1)
+    plt.close()
+
     print(f"\nAnalysis saved to: {os.path.join(PLOT_SAVE_DIR, 'drawn_digit_analysis.png')}")
     print(f"Original digit saved to: {drawn_digit_path}")
     
@@ -1035,4 +1050,12 @@ def main():
             print("Invalid choice. Please enter a number between 1 and 5.")
 
 if __name__ == "__main__":
+    import multiprocessing
+    multiprocessing.freeze_support()
+
+    def signal_handler(sig, frame):
+        print("\n\nExiting...")
+        os._exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
     main() 
