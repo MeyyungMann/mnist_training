@@ -272,13 +272,14 @@ def train_model(model, train_loader, val_loader, optimizer, criterion, epochs=20
     Train the model and return training history
     """
     model.train()
+    print(f"Training {model_name} on: {'GPU (' + torch.cuda.get_device_name(0) + ')' if next(model.parameters()).device.type == 'cuda' else 'CPU'}")
     train_losses = []
     val_losses = []
     train_accs = []
     val_accs = []
     best_val_acc = 0.0
     patience_counter = 0
-    
+
     for epoch in range(epochs):
         # Training phase
         model.train()
@@ -933,7 +934,7 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if device.type == 'cuda':
         gpu_name = torch.cuda.get_device_name(0)
-        gpu_memory = torch.cuda.get_device_properties(0).total_mem / 1024**3
+        gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1024**3
         print(f"Using device: GPU ({gpu_name}, {gpu_memory:.1f} GB)")
     else:
         print("Using device: CPU (no GPU detected, training will be slower)")
@@ -980,7 +981,7 @@ def main():
             
             # Train Model 1 (1 conv layer)
             print("\nTraining Model 1 (1 conv layer)...")
-            model1 = OneLayerCNN(dropout_rate=0.0, use_batch_norm=False).to(device)
+            model1 = OneLayerCNN(dropout_rate=0.0, use_batch_norm=True).to(device)
             train_loader1, val_loader1, test_loader1 = load_data(batch_size=64, use_augmentation=True)
             optimizer1 = optim.Adam(model1.parameters(), lr=0.001, weight_decay=0.0001)
             criterion = nn.CrossEntropyLoss()
